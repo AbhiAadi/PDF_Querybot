@@ -22,7 +22,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return render_template('homepage1.html')
+    return render_template('homepage.html')
 
 @app.route('/query', methods=['POST'])
 def handle_query():
