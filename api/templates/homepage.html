@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QueryBot</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+    }
+    .chat-container {
+        max-width: 800px;
+        margin: 50px auto;
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    .chat-header {
+        background-color: #007bff;
+        color: #fff;
+        padding: 15px;
+        text-align: center;
+        font-size: 20px;
+    }
+    .chat-messages {
+        padding: 15px;
+        overflow-y: auto;
+        height: 300px;
+    }
+    .message {
+        margin-bottom: 10px;
+    }
+    .user-message {
+        text-align: right;
+    }
+    .bot-message {
+        text-align: left;
+    }
+    .message-text {
+        display: inline-block;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .user-message .message-text {
+        background-color: #007bff;
+        color: #fff;
+    }
+    .bot-message .message-text {
+        background-color: #f0f0f0;
+        color: #333;
+    }
+    .chat-input {
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        background-color: #f9f9f9;
+    }
+    .chat-input input[type="text"] {
+        flex: 1;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        margin-right: 10px;
+    }
+    .chat-input input[type="file"] {
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        margin-right: 10px;
+    }
+    .chat-input button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    .chat-input button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+    .chat-input button:hover {
+        background-color: #0056b3;
+    }
+</style>
+</head>
+<body>
+
+    
+    <div class="chat-container">
+        <div class="chat-header">QueryBot</div>
+        <div class="chat-messages" id="chat-messages">
+            <!-- Initial bot message -->
+            <div class="message bot-message">
+                <div class="message-text">Hello! How can I assist you today?</div>
+            </div>
+        </div>
+        <div class="chat-input">
+            <!-- User input field -->
+            <input type="text" id="user-input" placeholder="Type your message...">
+            <!-- File input field -->
+            <input type="file" id="file-input">
+            <!-- Send button -->
+            <button id="send-btn">Send</button>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('send-btn').addEventListener('click', function() {
+            // Disable send button
+            document.getElementById('send-btn').disabled = true;
+            
+            // Get user input and selected file
+            var userInput = document.getElementById('user-input').value;
+            var fileInput = document.getElementById('file-input').files[0];
+    
+            // Clear user input after sending request
+            document.getElementById('user-input').value = '';
+            
+            // Display user's query on the right side
+            displayMessage(userInput, 'user-message');
+    
+            // Create FormData object to send data
+            var formData = new FormData();
+            formData.append('query', userInput);
+            formData.append('file', fileInput);
+    
+            // Send data to server using fetch API
+            fetch('/query', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display bot's response on the left side
+                displayMessage(data.response, 'bot-message');
+                
+                // Enable send button
+                document.getElementById('send-btn').disabled = false;
+            })
+            .catch(error => {
+                // Handle errors
+                console.error('Error:', error);
+                displayMessage("Sorry, an error occurred while processing your request.", 'bot-message');
+                
+                // Enable send button
+                document.getElementById('send-btn').disabled = false;
+            });
+        });
+    
+        function displayMessage(message, className) {
+            // Create message element
+            var messageDiv = document.createElement('div');
+            messageDiv.className = 'message ' + className;
+            var messageText = document.createElement('div');
+            messageText.className = 'message-text';
+            messageText.innerHTML = message; // Use innerHTML to render HTML tags in the response
+            messageDiv.appendChild(messageText);
+    
+            // Append message to chat container
+            var chatMessages = document.getElementById('chat-messages');
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+    
+    </body>
+    </html>
